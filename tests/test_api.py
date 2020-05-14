@@ -95,6 +95,15 @@ class APITest(object):
         resp = client.get('/swagger.json')
         assert resp.status_code == 404
 
+    def test_specs_endpoint_is_hidden(self, app, client):
+        api = restplus.Api()
+        api.init_app(app, hide_specs_url=True)
+        resp = client.get('/swagger.json')
+        assert resp.status_code == 404
+        resp = client.get('/')
+        assert resp.status_code == 200
+
+
     def test_default_endpoint(self, app):
         api = restplus.Api(app)
 
