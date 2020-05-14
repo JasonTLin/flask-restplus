@@ -103,7 +103,6 @@ class APITest(object):
         resp = client.get('/')
         assert resp.status_code == 200
 
-
     def test_default_endpoint(self, app):
         api = restplus.Api(app)
 
