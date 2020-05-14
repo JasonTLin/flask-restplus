@@ -185,6 +185,7 @@ class Api(object):
         self.license = kwargs.get('license', self.license)
         self.license_url = kwargs.get('license_url', self.license_url)
         self._add_specs = kwargs.get('add_specs', True)
+        self._hide_specs_url = kwargs.get('hide_specs_url', False)
 
         # If app is a blueprint, defer the initialization
         try:
@@ -244,7 +245,7 @@ class Api(object):
         conf['apidoc_registered'] = True
 
     def _register_specs(self, app_or_blueprint):
-        if self._add_specs:
+        if self._add_specs and not self._hide_specs_url:
             endpoint = str('specs')
             self._register_view(
                 app_or_blueprint,

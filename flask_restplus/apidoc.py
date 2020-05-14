@@ -2,6 +2,7 @@
 from __future__ import unicode_literals
 
 from flask import url_for, Blueprint, render_template
+import json
 
 
 class Apidoc(Blueprint):
@@ -32,5 +33,8 @@ def swagger_static(filename):
 
 def ui_for(api):
     '''Render a SwaggerUI for a given API'''
+    if api._hide_specs_url:
+        return render_template('swagger-ui.html', title=api.title,
+        specs_json=api.__schema__, specs_url=None)
     return render_template('swagger-ui.html', title=api.title,
                            specs_url=api.specs_url)
