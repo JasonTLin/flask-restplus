@@ -123,6 +123,7 @@ class Api(object):
         self._doc_view = None
         self._default_error_handler = None
         self.tags = tags or []
+        self._spec_view = None
 
         self.error_handlers = {
             ParseError: mask_parse_error_handler,
@@ -248,7 +249,9 @@ class Api(object):
         conf['apidoc_registered'] = True
 
     def _register_specs(self, app_or_blueprint):
-        if self._add_specs and not self._hide_specs_url:
+        if self._hide_specs_url:
+            app_or_blueprint.add_url_rule('/swagger.json', 'specs', self.render_spec)
+        elif self._add_specs:
             endpoint = str('specs')
             self._register_view(
                 app_or_blueprint,
@@ -380,6 +383,12 @@ class Api(object):
         self._doc_view = func
         return func
 
+    def specs(self, func):
+        '''A decorator to specify a view function for the specs'''
+        self._hide_specs_url = True
+        self._spec_view = func
+        return func
+
     def render_root(self):
         self.abort(HTTPStatus.NOT_FOUND)
 
@@ -390,6 +399,13 @@ class Api(object):
         elif not self._doc:
             self.abort(HTTPStatus.NOT_FOUND)
         return apidoc.ui_for(self)
+
+    def render_spec(self):
+        if self._spec_view:
+            return self._spec_view()
+        elif not self.__schema__:
+            self.abort(HTTPStatus.NOT_FOUND)
+        return apidoc.specs_for(self)
 
     def default_endpoint(self, resource, namespace):
         '''

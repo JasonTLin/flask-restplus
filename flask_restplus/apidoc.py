@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from flask import url_for, Blueprint, render_template
+from flask import url_for, Blueprint, render_template, jsonify
 
 
 class Apidoc(Blueprint):
@@ -37,3 +37,7 @@ def ui_for(api):
         specs_json=api.__schema__, specs_url=None)
     return render_template('swagger-ui.html', title=api.title,
                            specs_url=api.specs_url)
+
+
+def specs_for(api):
+    return jsonify(api.__schema__)
