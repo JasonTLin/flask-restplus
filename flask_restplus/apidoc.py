@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from flask import url_for, Blueprint, render_template, jsonify
+import json
+from flask import url_for, Blueprint, render_template, Response
 
 
 class Apidoc(Blueprint):
@@ -40,4 +41,5 @@ def ui_for(api):
 
 
 def specs_for(api):
-    return jsonify(api.__schema__)
+    swagger_specs = json.dumps(api.__schema__, sort_keys=True, indent=4, separators=(',', ': '))
+    return Response(swagger_specs, mimetype='application/json')

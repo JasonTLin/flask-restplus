@@ -383,9 +383,10 @@ class Api(object):
 
     def specs(self, func):
         '''A decorator to specify a view function for the specs'''
-        self._hide_specs_url = True
+        self._spec_view = partial(apidoc.specs_for, self)
+        if func:
+            self._spec_view = func
         app = self.app or self.Blueprint
-        self._spec_view = func
         app.add_url_rule('/swagger.json', 'specs', self.render_spec)
         return func
 
