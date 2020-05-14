@@ -249,9 +249,7 @@ class Api(object):
         conf['apidoc_registered'] = True
 
     def _register_specs(self, app_or_blueprint):
-        if self._hide_specs_url:
-            app_or_blueprint.add_url_rule('/swagger.json', 'specs', self.render_spec)
-        elif self._add_specs:
+        if self._add_specs and not self._hide_specs_url:
             endpoint = str('specs')
             self._register_view(
                 app_or_blueprint,
@@ -386,7 +384,9 @@ class Api(object):
     def specs(self, func):
         '''A decorator to specify a view function for the specs'''
         self._hide_specs_url = True
+        app = self.app or self.Blueprint
         self._spec_view = func
+        app.add_url_rule('/swagger.json', 'specs', self.render_spec)
         return func
 
     def render_root(self):
