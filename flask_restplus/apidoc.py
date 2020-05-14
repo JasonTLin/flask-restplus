@@ -2,7 +2,6 @@
 from __future__ import unicode_literals
 
 from flask import url_for, Blueprint, render_template
-import json
 
 
 class Apidoc(Blueprint):
