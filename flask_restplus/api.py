@@ -27,7 +27,7 @@ from jsonschema import RefResolver
 
 try:
     from werkzeug.utils import cached_property
-except:
+except ImportError:
     from werkzeug import cached_property
 from werkzeug.datastructures import Headers
 from werkzeug.exceptions import HTTPException, MethodNotAllowed, NotFound, NotAcceptable, InternalServerError
