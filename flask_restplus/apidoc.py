@@ -3,7 +3,6 @@ from __future__ import unicode_literals
 
 import json
 from flask import url_for, Blueprint, render_template, Response
-from ._http import HTTPStatus
 
 
 class Apidoc(Blueprint):
@@ -40,5 +39,6 @@ def ui_for(api):
 
 def specs_for(api):
     swagger_specs = json.dumps(api.__schema__, sort_keys=True, indent=4, separators=(',', ': '))
-    return Response(swagger_specs, mimetype='application/json'),
-    HTTPStatus.INTERNAL_SERVER_ERROR if 'error' in api.__schema__ else HTTPStatus.OK
+    if 'error' in api.__schema__:
+        return Response(swagger_specs, status=500, mimetype='application/json')
+    return Response(swagger_specs, status=200, mimetype='application/json')
