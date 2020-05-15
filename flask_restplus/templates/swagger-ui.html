@@ -50,11 +50,7 @@
     <script type="text/javascript">
         window.onload = function() {
             const ui = window.ui = new SwaggerUIBundle({
-                {% if specs_json is defined %}
                 spec: {{ specs_json | tojson}},
-                {% else %}
-                url: "{{ specs_url }}",
-                {%- endif %}
                 {% if config.SWAGGER_UI_OAUTH_CLIENT_ID -%}
                 oauth2RedirectUrl: "{{ url_for('restplus_doc.static', filename='oauth2-redirect.html', _external=True) }}",
                 {%- endif %}

@@ -3,6 +3,7 @@ from __future__ import unicode_literals
 
 import json
 from flask import url_for, Blueprint, render_template, Response
+from ._http import HTTPStatus
 
 
 class Apidoc(Blueprint):
@@ -33,13 +34,11 @@ def swagger_static(filename):
 
 def ui_for(api):
     '''Render a SwaggerUI for a given API'''
-    if api._hide_specs_url:
-        return render_template('swagger-ui.html', title=api.title,
-        specs_json=api.__schema__, specs_url=None)
     return render_template('swagger-ui.html', title=api.title,
-                           specs_url=api.specs_url)
+        specs_json=api.__schema__)
 
 
 def specs_for(api):
     swagger_specs = json.dumps(api.__schema__, sort_keys=True, indent=4, separators=(',', ': '))
-    return Response(swagger_specs, mimetype='application/json')
+    return Response(swagger_specs, mimetype='application/json'),
+    HTTPStatus.INTERNAL_SERVER_ERROR if 'error' in api.__schema__ else HTTPStatus.OK

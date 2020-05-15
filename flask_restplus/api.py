@@ -37,7 +37,6 @@ from . import apidoc
 from .mask import ParseError, MaskError
 from .namespace import Namespace
 from .postman import PostmanCollectionV1
-from .resource import Resource
 from .swagger import Swagger
 from .utils import default_id, camel_to_dash, unpack
 from .representations import output_json
@@ -123,7 +122,7 @@ class Api(object):
         self._doc_view = None
         self._default_error_handler = None
         self.tags = tags or []
-        self._spec_view = None
+        self._spec_view = partial(apidoc.specs_for, self)
 
         self.error_handlers = {
             ParseError: mask_parse_error_handler,
@@ -189,7 +188,6 @@ class Api(object):
         self.license = kwargs.get('license', self.license)
         self.license_url = kwargs.get('license_url', self.license_url)
         self._add_specs = kwargs.get('add_specs', True)
-        self._hide_specs_url = kwargs.get('hide_specs_url', False)
 
         # If app is a blueprint, defer the initialization
         try:
@@ -249,17 +247,8 @@ class Api(object):
         conf['apidoc_registered'] = True
 
     def _register_specs(self, app_or_blueprint):
-        if self._add_specs and not self._hide_specs_url:
-            endpoint = str('specs')
-            self._register_view(
-                app_or_blueprint,
-                SwaggerView,
-                self.default_namespace,
-                '/swagger.json',
-                endpoint=endpoint,
-                resource_class_args=(self, )
-            )
-            self.endpoints.add(endpoint)
+        if self._add_specs:
+            app_or_blueprint.add_url_rule('/swagger.json', 'specs', self.render_spec)
 
     def _register_doc(self, app_or_blueprint):
         if self._add_specs and self._doc:
@@ -383,11 +372,7 @@ class Api(object):
 
     def specs(self, func):
         '''A decorator to specify a view function for the specs'''
-        self._spec_view = partial(apidoc.specs_for, self)
-        if func:
-            self._spec_view = func
-        app = self.app or self.Blueprint
-        app.add_url_rule('/swagger.json', 'specs', self.render_spec)
+        self._spec_view = func
         return func
 
     def render_root(self):
@@ -850,16 +835,6 @@ class Api(object):
         if self.blueprint:
             endpoint = '{0}.{1}'.format(self.blueprint.name, endpoint)
         return url_for(endpoint, **values)
-
-
-class SwaggerView(Resource):
-    '''Render the Swagger specifications as JSON'''
-    def get(self):
-        schema = self.api.__schema__
-        return schema, HTTPStatus.INTERNAL_SERVER_ERROR if 'error' in schema else HTTPStatus.OK
-
-    def mediatypes(self):
-        return ['application/json']
 
 
 def mask_parse_error_handler(error):
